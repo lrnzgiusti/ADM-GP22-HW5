@@ -1,11 +1,11 @@
 ### Group 22
-# ADM_HOMEWORK 5
+## ADM_HOMEWORK 5
 
 ### Visit the Wikipedia hyperlinks graph!
 
 In this homework we have performed analysis of the **Wikipedia Hyperlink graph**. In particular, we have used the reduced version of the Wikipedia Graph provided by the SNAP group.
 
-![bella](https://pbs.twimg.com/media/CNCowF1WEAAV1aZ.jpg)
+![bella](https://pbs.twimg.com/media/CNCowF1WEAAV1aZ.jpg){:height="36px" width="36px"}
 
 
 ### Getting Started
