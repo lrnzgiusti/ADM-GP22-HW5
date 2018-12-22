@@ -5,7 +5,7 @@
 
 In this homework we have performed analysis of the **Wikipedia Hyperlink graph**. In particular, we have used the reduced version of the Wikipedia Graph provided by the SNAP group.
 
-![bella](https://pbs.twimg.com/media/CNCowF1WEAAV1aZ.jpg =640x480)
+![bella](https://pbs.twimg.com/media/CNCowF1WEAAV1aZ.jpg=640x480)
 
 
 ### Getting Started
