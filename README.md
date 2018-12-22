@@ -31,7 +31,7 @@ Importing libraries like Networkx to implement this graphs, Threading and Multip
 
 * bfs_monodirectional: The classical one-side bfs, where you pick a source and a target node, and you traverse along the graph from the source to the target.
 * shortest_path_bidir: The two-side bfs is more faster and is deterministic, we've used this for the entire analysis.
-* depth_wrapper_spanning_tree: This is a fancy random algorithm to build the bfs algorithm, we have developed this brand new algorithm specially for this homework. First you compute a generator for the spanning tree and then pick at random a random unique path, if source and target are in this random path,then the path found by this algorithm is correct. Otherwise pick another random path, you can prove that with this [Smooth analysis](https://arxiv.org/pdf/cs/0111050.pdf) that the overall complexity is lower than the monodirectional bfs, but higher than the bidirectional bfs.
+* depth_wrapper_spanning_tree: This is a fancy random algorithm to build the bfs algorithm, we have developed this brand new algorithm specially for this homework. First you compute a generator for the spanning tree and then pick at random a random unique path, if source and target are in this random path,then the path found by this algorithm is correct. Otherwise pick another random path, you can prove that with this [Smoothed analysis](https://arxiv.org/pdf/cs/0111050.pdf) that the overall complexity is lower than the monodirectional bfs, but higher than the bidirectional bfs.
 
 
 ## Authors
