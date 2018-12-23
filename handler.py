@@ -15,13 +15,14 @@ class Handler():
         Then you build the categories in a defaultdict taken if the articles inside that category are more than 3500
         In the end we read the graph from the wiki-topcats-reduced file that contains only the directed edges of the graph
         """
-        self.input_category = 'American_Jews'
-        self.categories = defaultdict(list)
+        self.input_category = input()
+        self.categories = defaultdict(set)
         with open('wiki-topcats-categories.txt', 'r') as f:
             for row in f:
                 splitted_row = row.split(' ')
                 if len(splitted_row[1:]) > 3500:
-                    self.categories[splitted_row[0][9:-1]] = splitted_row[1:]
+                    self.categories[  splitted_row[0][9:-1]   ] = set(splitted_row[1:])
+        self.inverted_index =  {node : cate for cate in self.categories for node in self.categories[cate]}
         self.G = nx.read_edgelist('wiki-topcats-reduced.txt', nodetype=str, 
                                   delimiter='\t', create_using=nx.DiGraph())
 
@@ -180,8 +181,7 @@ class Handler():
             gen.append(self.Generator(depth(st, source ,dest,0)))
         return gen
 
-    def multithread_lorenzo(self, *args):
-
+    def multithread_engine(self, *args):
         f = open(args[0]+'.json', 'w') #this will be the output jsonfile
         # if the current category is the input category, simply put -1 inside the file and stop the thread
         if args[0] == self.input_category:
@@ -215,7 +215,7 @@ class Handler():
                        paths.append( len(sp)-1 )
 
         
-        data[Ci] = np.median(paths)/(1+((infs**.5)*np.log(infs+1)))
+        data[args[0]] = np.median(paths) + ((infs**.5)*np.log(infs+1))
         json.dump(data, f)
         f.close()
         return
@@ -240,8 +240,8 @@ class Handler():
             """
             for j in range(virtuals):
                 if(i+j < len(self.categories)):
-                    t = Thread(target=self.multithread_lorenzo, 
-                               args=(list(self.categories.keys())[i+j]))
+                    t = Thread(target=self.multithread_engine, 
+                               args=(list(self.categories.keys())[i+j], 'null'))
                     t.start()
                     synchronization_stack.append(t)
             for thread in synchronization_stack:
@@ -249,6 +249,7 @@ class Handler():
                 
         """ you have all the results. The only thing that remains to do is to combine the results provided by the concurrency. """
         recombinator = self.combine()
+        self.block_ranking = recombinator
         fptr = open('dropthebayes.json', 'w')
         json.dump(recombinator, fptr)
         fptr.close()
@@ -262,5 +263,56 @@ class Handler():
             f.close()
         return sorted(values.items(), key=lambda kv: kv[1])
 
-
-
+    def cat_builder(self):
+        block_ranking = [elem[0] for elem in json.load(open('dropthebayes.json', 'r'))]
+        visited = set()
+        for supcategory in block_ranking:
+            bigset = set()
+            visited.add(supcategory)
+            for subcategory in block_ranking:
+                if subcategory in visited:
+                    continue
+                else:
+                    bigset = bigset.union(set(self.categories[subcategory]).intersection(self.categories[supcategory]))
+                        
+            for subcategory_tmp_rmv in block_ranking:
+                if subcategory_tmp_rmv in visited:
+                    continue
+                else:
+                    self.categories[subcategory_tmp_rmv] = set(self.categories[subcategory_tmp_rmv]).difference(bigset)
+                
+    def in_degree(self, G):
+        indegre = {}
+        """
+        init dei pesi
+        """
+        for node in G.nodes():
+            indegre[node] = 0
+        for edge in G.edges():
+            indegre[edge[1]] += G[edge[0]][edge[1]]['w']
+        return indegre
+    
+    
+    def pagerank(self):
+        """
+        TODO:  SOSTITUIRE F CON IL BLOCK RANKING.
+        
+        """
+        first_subgraph = self.G.subgraph(nodes=self.categories[self.block_ranking[0][0]])
+        for edge in first_subgraph.edges():
+            first_subgraph[edge[0]][edge[1]]['w'] = 1
+        scores = self.in_degree(first_subgraph)
+                
+        for i in range(1, len(self.block_ranking)):
+            second_subgraph = nx.DiGraph(first_subgraph)
+            second_subgraph.add_edges_from(self.G.subgraph(self.categories[self.block_ranking[i][0]]).edges())
+            for edge in second_subgraph.edges():
+                if edge[1] in self.categories[self.block_ranking[i][0]]:
+                    if edge[0] in scores:
+                        second_subgraph[edge[0]][edge[1]]['w'] = scores[edge[0]]
+                    else:         
+                        second_subgraph[edge[0]][edge[1]]['w'] = 1
+                
+        scores = self.in_degree(second_subgraph)
+        first_subgraph = nx.DiGraph(second_subgraph)
+        return scores
