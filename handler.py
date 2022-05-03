@@ -294,10 +294,6 @@ class Handler():
     
     
     def pagerank(self):
-        """
-        TODO:  SOSTITUIRE F CON IL BLOCK RANKING.
-        
-        """
         first_subgraph = self.G.subgraph(nodes=self.categories[self.block_ranking[0][0]])
         for edge in first_subgraph.edges():
             first_subgraph[edge[0]][edge[1]]['w'] = 1
